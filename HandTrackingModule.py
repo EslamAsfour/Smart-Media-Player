@@ -1,6 +1,7 @@
 import cv2 as cv
 import mediapipe as mp
 import time as t
+from scipy.spatial import distance as dist
 
 
 '''
@@ -85,7 +86,8 @@ class HandDetector():
 
 
 
-     def main() :
+     def main():
+
 
           #Initiallization for Time
           pTime=0
@@ -98,11 +100,7 @@ class HandDetector():
              success, img = cap.read()
 
              img=detector.FindHands(img)
-             lmList=detector.FindPositions(img)
-             if len(lmList) != 0:
-                 print(lmList[4])
-
-
+             lmList=detector.FindPositions(img,draw=False)
 
              #Displaying The Frame Rate Per Second
              cTime=t.time()
@@ -110,8 +108,28 @@ class HandDetector():
              pTime=cTime
 
              cv.putText(img , str(int(fps)),(10,70),cv.FONT_HERSHEY_PLAIN,3,(255,0,255),3)
-          
-             #Dsiplay our Image
+             #number 1
+
+             if len(lmList) != 0:
+               no_one_dist = int(dist.euclidean((lmList[8][1],lmList[8][2]),(lmList[0][1],lmList[0][2])))
+               no_two_dist = int(dist.euclidean((lmList[12][1],lmList[12][2]),(lmList[0][1],lmList[0][2])))
+               no_three_dist = int(dist.euclidean((lmList[16][1],lmList[16][2]),(lmList[0][1],lmList[0][2])))
+               no_four_dist = int(dist.euclidean((lmList[20][1],lmList[20][2]),(lmList[0][1],lmList[0][2])))
+               # print("4","3","2","1")
+               # print(int(no_four_dist),int(no_three_dist),int(no_two_dist),int(no_one_dist))
+               if  int(no_one_dist/no_two_dist) >= 2 and int(no_one_dist/no_three_dist) >= 2 and int(no_one_dist/no_four_dist) >= 2:
+                    print("Number 1")
+               elif int(no_two_dist/no_one_dist) >= 1 and int(no_one_dist/no_three_dist) >= 2 and int(no_one_dist/no_four_dist) >= 2:
+                    print("Number 2")
+               elif (int(no_two_dist / no_one_dist) >= 1 and int(no_two_dist / no_three_dist) >= 1 and int(no_one_dist / no_four_dist) >= 2) or (int(no_two_dist / no_three_dist) >= 1 and int(no_two_dist / no_four_dist) >= 1 and int(no_four_dist / no_one_dist) > 0.8):
+                    print("Number 3")
+               elif int(no_two_dist / no_three_dist) >= 1 and int(no_two_dist / no_four_dist) >= 1 and int(no_one_dist / no_four_dist) > 0.5:
+                    print("Number 4")
+                    #bug when the hand is closed the condition is still true.
+               else:
+                    print("No")
+
+             #Display our Image
              cv.imshow("Image",img)
              cv.waitKey(1)
                
@@ -119,81 +137,3 @@ class HandDetector():
      if __name__ == "__main__":
         main()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-cap =cv.VideoCapture(0)
-
-#Formality before start using this module
-mpHands = mp.solutions.mediapipe.python.solutions.hands
-mpDraws=mp.solutions.mediapipe.python.solutions.drawing_utils  
-
-#object from our model to use class Hands
-hands=mpHands.Hands()                                        
-
-
-#Initiallization for Time
-pTime=0
-cTime=0
-
-while True:
-     success, img = cap.read()
-     ImageRGB= cv.cvtColor(img,cv.COLOR_BGR2RGB)
-     results= hands.process(ImageRGB)
-
-     #print(results.multi_hand_landmarks)
-     if results.multi_hand_landmarks:
-          #take hand by hand if there is more than one
-          for handLms in results.multi_hand_landmarks: 
-               #Getting each landmark with it's Id
-               for id,lm in enumerate(handLms.landmark):
-                    h,w,c = img.shape
-                    cx, cy = int(lm.x * w), int(lm.y * h)
-                    print(id, cx, cy)
-                    
-                    cv.circle(img,(cx,cy),12,(0,0,0),cv.FILLED)
-               #draw landmarks on each hand
-               mpDraws.draw_landmarks(img,handLms , mpHands.HAND_CONNECTIONS)       
-
-
-
-     #Displaying The Frame Rate Per Second
-     cTime=t.time()
-     fps= 1/ (cTime-pTime)
-     pTime=cTime
-
-     cv.putText(img , str(int(fps)),(10,70),cv.FONT_HERSHEY_PLAIN,3,(255,0,255),3)
- 
-     #Dsiplay our Image
-     cv.imshow("Image",img)
-     cv.waitKey(1)
