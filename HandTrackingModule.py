@@ -58,7 +58,7 @@ class HandDetector():
           return img               
 
 
-     def FindPositions (self,img , HandNo=0 ,draw =True):
+     def FindPositions (self,img , HandNo=0 ,draw =False):
 
           """
           Arguments :
