@@ -1,0 +1,4 @@
+1-VLC(Last version) download -> "https://www.videolan.org/vlc/"
+2-pyautogui install -> "pip install pyautogui"
+3-tkinter install -> "pip install tk"
+4-pygetwindow -> "pip install PyGetWindow"
