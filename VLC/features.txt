@@ -1,0 +1,7 @@
+1-open VLC player 
+2-play media
+3-pause media
+4-toggle(play/pause)
+5-volume up
+6-volume down 
+7-focus on VLC (active windows)
