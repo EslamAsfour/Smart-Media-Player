@@ -41,9 +41,12 @@ class HandDetector():
           
           #! Conters
           self.PauseFlag = False
-          
+          self.VolUpCounter = 0
+          self.VolDownCounter = 0
           self.ToggleCounter = 0
-
+          self.FullScreenCounrter = 0
+          self.MinimizeCounter = 0
+          
      def FindHands (self , img , draw= True):
 
           """
@@ -103,52 +106,77 @@ class HandDetector():
                
                # print("4","3","2","1")
                # print(int(no_four_dist),int(no_three_dist),int(no_two_dist),int(no_one_dist))
-               #! Check for Thumbs Up 
-               
+               #! Toggle Play and Pause
                if (lmList[8][2]- lmList[4][2]) > 50  and (lmList[12][2]- lmList[4][2]) > 50:
-                    
                     self.ToggleCounter = self.ToggleCounter +1
-                    
-                    # Toggle Play/Pause
+                    self.VolDownCounter = 0
+                    self.VolUpCounter = 0
+                    self.FullScreenCounrter = 0
+                    self.MinimizeCounter = 0
+               #! Volume Up
                elif lmList[8][1] - lmList[5][1] > 100:
                     print("Side")
+                    self.VolDownCounter = self.VolDownCounter +1 
                     self.ToggleCounter = 0
+                    self.VolUpCounter = 0
+                    self.FullScreenCounrter = 0
+                    self.MinimizeCounter = 0
                     
-                    
-                    # Up Volume
+               #! Volume Down
                elif lmList[5][1] - lmList[8][1] > 100:
                     print("Other Side")  
-                    
+                    self.VolUpCounter = self.VolUpCounter+1 
                     self.ToggleCounter = 0
-                    # Down Volume   
+                    self.VolDownCounter = 0
+                    self.FullScreenCounrter = 0
+                    self.MinimizeCounter = 0
+               #! Full Screen
                elif  int(no_one_dist/no_two_dist) >= 2 and int(no_one_dist/no_three_dist) >= 2 and int(no_one_dist/no_four_dist) >= 2:
                     print("Number 1") 
+                    self.FullScreenCounrter = self.FullScreenCounrter +1
                     self.ToggleCounter = 0
+                    self.VolDownCounter = 0
+                    self.VolUpCounter = 0
+                    self.MinimizeCounter = 0
+                    '''
+                    #! Minimize 
+                    elif int(no_two_dist/no_one_dist) >= 1 and int(no_one_dist/no_three_dist) >= 2 and int(no_one_dist/no_four_dist) >= 2:
+                         print("Number 2")
+                         self.ToggleCounter = 0
+                         self.VolDownCounter = 0
+                         self.VolUpCounter = 0
+                         self.FullScreenCounrter = 0
+                         self.MinimizeCounter = self.MinimizeCounter +1 
+                         
+                    elif (int(no_two_dist / no_one_dist) >= 1 and int(no_two_dist / no_three_dist) >= 1 and int(no_one_dist / no_four_dist) >= 2) or (int(no_two_dist / no_three_dist) >= 1 and int(no_two_dist / no_four_dist) >= 1 and int(no_four_dist / no_one_dist) > 0.8):
+                         print("Number 3")
+                         self.ToggleCounter = 0
+                         self.VolDownCounter = 0
+                         self.VolUpCounter = 0
+                         self.FullScreenCounrter = 0
+                         self.MinimizeCounter = 0
                     
-                    self.PauseCounter = self.PauseCounter + 1
-                    # Maximise 
-               elif int(no_two_dist/no_one_dist) >= 1 and int(no_one_dist/no_three_dist) >= 2 and int(no_one_dist/no_four_dist) >= 2:
-                    print("Number 2")
-                    self.ToggleCounter = 0
-                    
-                    # Minimise
-               elif (int(no_two_dist / no_one_dist) >= 1 and int(no_two_dist / no_three_dist) >= 1 and int(no_one_dist / no_four_dist) >= 2) or (int(no_two_dist / no_three_dist) >= 1 and int(no_two_dist / no_four_dist) >= 1 and int(no_four_dist / no_one_dist) > 0.8):
-                    print("Number 3")
-                    self.ToggleCounter = 0
-                    
-                    # Full Screen
-               elif int(no_two_dist / no_three_dist) >= 1 and int(no_two_dist / no_four_dist) >= 1 and int(no_one_dist / no_four_dist) > 0.5:
-                    print("Number 4")
-                    self.ToggleCounter = 0
-                    
+                    elif int(no_two_dist / no_three_dist) >= 1 and int(no_two_dist / no_four_dist) >= 1 and int(no_one_dist / no_four_dist) > 0.5:
+                         print("Number 4")
+                         self.ToggleCounter = 0
+                         self.VolDownCounter = 0
+                         self.VolUpCounter = 0
+                         self.FullScreenCounrter = 0
+                         self.MinimizeCounter = 0
+                    '''     
                     #bug when the hand is closed the condition is still true.
                else:
                     print("No")
                     self.ToggleCounter = 0
+                    self.VolDownCounter = 0
+                    self.VolUpCounter = 0
+                    self.FullScreenCounrter = 0
+                    self.MinimizeCounter = 0
                     
                
                
                #! Check for Action
+               #! Toggle  Play/Pause
                if self.ToggleCounter > 20:
                     if VLC.Get_Status_VLC() == True:
                          self.PauseFlag = True
@@ -156,9 +184,23 @@ class HandDetector():
                          self.PauseFlag = False
                     self.ToggleCounter =0
                     VLC.toggle_VLC(self.VLC)
-                    print("Now Wait 50")
                     return 50
+               #! Volume Up
+               elif self.VolUpCounter > 15:
+                    self.VolUpCounter = 0
+                    VLC.VolUP_VLC(self.VLC)
+                    return 30
+               #! Volume Down
+               elif self.VolDownCounter > 15:
+                    self.VolDownCounter = 0
+                    VLC.VolDown_VLC(self.VLC)
+                    return 30
                #If no Action 
+               #! Volume Up
+               elif self.FullScreenCounrter > 20:
+                    self.FullScreenCounrter = 0
+                    VLC.TFS_VLC(self.VLC)
+                    return 30
                
                return 0
           return 0

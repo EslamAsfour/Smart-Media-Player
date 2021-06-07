@@ -212,7 +212,6 @@ def Pause_VLC(VLC):
 def TFS_VLC(VLC):
     if(not(gw.getActiveWindow() == VLC)):
         # print("VLC is not on focus")
-        
         return -1
     pyautogui.press('f')
     
