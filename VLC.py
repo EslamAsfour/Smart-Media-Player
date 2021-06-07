@@ -54,7 +54,7 @@ def Open_VLC():
 ##############################################################################
 def toggle_VLC(VLC):
     if(not(gw.getActiveWindow() == VLC)):
-        print("VLC is not on focus")
+        # print("VLC is not on focus")
         return -1
     pyautogui.press('space')
     toggle_Status_VLC()
@@ -72,7 +72,7 @@ def toggle_VLC(VLC):
 ##############################################################################
 def VolUP_VLC(VLC):
     if(not(gw.getActiveWindow() == VLC)):
-        print("VLC is not on focus")
+        # print("VLC is not on focus")
         return -1
     pyautogui.hotkey('ctrl','up')
 ##############################################################################
@@ -89,7 +89,7 @@ def VolUP_VLC(VLC):
 ##############################################################################
 def VolDown_VLC(VLC):
     if(not(gw.getActiveWindow() == VLC)):
-        print("VLC is not on focus")
+        # print("VLC is not on focus")
         return -1
     pyautogui.hotkey('ctrl','down')
 ##############################################################################
@@ -165,8 +165,8 @@ def Get_Status_VLC():
 ##############################################################################
 def Play_VLC(VLC):
     if(not(gw.getActiveWindow().title == VLC.title)):
-        print("VLC is not on focus")
-        print(gw.getActiveWindow().title , VLC.title)
+        # print("VLC is not on focus")
+        # print(gw.getActiveWindow().title , VLC.title)
         return -1
     if(Get_Status_VLC()==True):
         return 1
@@ -188,8 +188,8 @@ def Play_VLC(VLC):
 ##############################################################################
 def Pause_VLC(VLC):
     if(not(gw.getActiveWindow().title == VLC.title)):
-        print("VLC is not on focus")
-        print(gw.getActiveWindow().title , VLC.title)
+        # print("VLC is not on focus")
+        # print(gw.getActiveWindow().title , VLC.title)
         return -1
     if(Get_Status_VLC()==False):
         return 1
@@ -211,7 +211,7 @@ def Pause_VLC(VLC):
 ##############################################################################
 def TFS_VLC(VLC):
     if(not(gw.getActiveWindow() == VLC)):
-        print("VLC is not on focus")
+        # print("VLC is not on focus")
         
         return -1
     pyautogui.press('f')

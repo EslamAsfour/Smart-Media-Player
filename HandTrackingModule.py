@@ -2,6 +2,7 @@ import cv2 as cv
 import mediapipe as mp
 import time as t
 from scipy.spatial import distance as dist
+import VLC 
 
 
 '''
@@ -13,7 +14,7 @@ Hand Detector class contain 4 main functions
 '''
 class HandDetector():
 
-     def __init__ (self, mode=False, maxHands=2, detectionCon=0.5, trackCon=0.5):
+     def __init__ (self, VLC , mode=False, maxHands=1, detectionCon=0.5, trackCon=0.5  ):
 
           """
           Arguments :
@@ -28,7 +29,7 @@ class HandDetector():
           self.maxHands=maxHands
           self.detectionCon=detectionCon
           self.trackCon=trackCon
-
+          self.VLC = VLC
 
           #Formality before start using this module
 
@@ -37,6 +38,11 @@ class HandDetector():
 
           #Formality before start using this module
           self.mpDraws=mp.solutions.mediapipe.python.solutions.drawing_utils 
+          
+          #! Conters
+          self.PauseFlag = False
+          
+          self.ToggleCounter = 0
 
      def FindHands (self , img , draw= True):
 
@@ -80,13 +86,88 @@ class HandDetector():
                     lmList.append([id,cx,cy])
                     if draw:
                        cv.circle(img,(cx,cy),12,(0,0,0),cv.FILLED)
+          return lmList   
+            
+     #! Takes img and do action based on the gesture
+     def GestureAction(self , img):
+          
+         
+          img=self.FindHands(img)
+          lmList=self.FindPositions(img,draw=False)
+          if len(lmList) != 0:
+               no_one_dist = int(dist.euclidean((lmList[8][1],lmList[8][2]),(lmList[0][1],lmList[0][2])))
+               no_two_dist = int(dist.euclidean((lmList[12][1],lmList[12][2]),(lmList[0][1],lmList[0][2])))
+               no_three_dist = int(dist.euclidean((lmList[16][1],lmList[16][2]),(lmList[0][1],lmList[0][2])))
+               no_four_dist = int(dist.euclidean((lmList[20][1],lmList[20][2]),(lmList[0][1],lmList[0][2])))
+               
+               
+               # print("4","3","2","1")
+               # print(int(no_four_dist),int(no_three_dist),int(no_two_dist),int(no_one_dist))
+               #! Check for Thumbs Up 
+               
+               if (lmList[8][2]- lmList[4][2]) > 50  and (lmList[12][2]- lmList[4][2]) > 50:
+                    
+                    self.ToggleCounter = self.ToggleCounter +1
+                    
+                    # Toggle Play/Pause
+               elif lmList[8][1] - lmList[5][1] > 100:
+                    print("Side")
+                    self.ToggleCounter = 0
+                    
+                    
+                    # Up Volume
+               elif lmList[5][1] - lmList[8][1] > 100:
+                    print("Other Side")  
+                    
+                    self.ToggleCounter = 0
+                    # Down Volume   
+               elif  int(no_one_dist/no_two_dist) >= 2 and int(no_one_dist/no_three_dist) >= 2 and int(no_one_dist/no_four_dist) >= 2:
+                    print("Number 1") 
+                    self.ToggleCounter = 0
+                    
+                    self.PauseCounter = self.PauseCounter + 1
+                    # Maximise 
+               elif int(no_two_dist/no_one_dist) >= 1 and int(no_one_dist/no_three_dist) >= 2 and int(no_one_dist/no_four_dist) >= 2:
+                    print("Number 2")
+                    self.ToggleCounter = 0
+                    
+                    # Minimise
+               elif (int(no_two_dist / no_one_dist) >= 1 and int(no_two_dist / no_three_dist) >= 1 and int(no_one_dist / no_four_dist) >= 2) or (int(no_two_dist / no_three_dist) >= 1 and int(no_two_dist / no_four_dist) >= 1 and int(no_four_dist / no_one_dist) > 0.8):
+                    print("Number 3")
+                    self.ToggleCounter = 0
+                    
+                    # Full Screen
+               elif int(no_two_dist / no_three_dist) >= 1 and int(no_two_dist / no_four_dist) >= 1 and int(no_one_dist / no_four_dist) > 0.5:
+                    print("Number 4")
+                    self.ToggleCounter = 0
+                    
+                    #bug when the hand is closed the condition is still true.
+               else:
+                    print("No")
+                    self.ToggleCounter = 0
+                    
+               
+               
+               #! Check for Action
+               if self.ToggleCounter > 20:
+                    if VLC.Get_Status_VLC() == True:
+                         self.PauseFlag = True
+                    else : 
+                         self.PauseFlag = False
+                    self.ToggleCounter =0
+                    VLC.toggle_VLC(self.VLC)
+                    print("Now Wait 50")
+                    return 50
+               #If no Action 
+               
+               return 0
+          return 0
+          
 
 
-          return lmList          
 
-
-
-     def main():
+'''
+def main():
 
 
           #Initiallization for Time
@@ -115,9 +196,19 @@ class HandDetector():
                no_two_dist = int(dist.euclidean((lmList[12][1],lmList[12][2]),(lmList[0][1],lmList[0][2])))
                no_three_dist = int(dist.euclidean((lmList[16][1],lmList[16][2]),(lmList[0][1],lmList[0][2])))
                no_four_dist = int(dist.euclidean((lmList[20][1],lmList[20][2]),(lmList[0][1],lmList[0][2])))
+               
+               
                # print("4","3","2","1")
                # print(int(no_four_dist),int(no_three_dist),int(no_two_dist),int(no_one_dist))
-               if  int(no_one_dist/no_two_dist) >= 2 and int(no_one_dist/no_three_dist) >= 2 and int(no_one_dist/no_four_dist) >= 2:
+               #! Check for Thumbs Up 
+               
+               if (lmList[8][2]- lmList[4][2]) > 50  and (lmList[12][2]- lmList[4][2]) > 50:
+                    print("Thumbs Up!")
+               elif lmList[8][1] - lmList[5][1] > 100:
+                    print("Side")
+               elif lmList[5][1] - lmList[8][1] > 100:
+                    print("Other Side")     
+               elif  int(no_one_dist/no_two_dist) >= 2 and int(no_one_dist/no_three_dist) >= 2 and int(no_one_dist/no_four_dist) >= 2:
                     print("Number 1")
                elif int(no_two_dist/no_one_dist) >= 1 and int(no_one_dist/no_three_dist) >= 2 and int(no_one_dist/no_four_dist) >= 2:
                     print("Number 2")
@@ -137,3 +228,4 @@ class HandDetector():
      if __name__ == "__main__":
         main()
 
+'''
